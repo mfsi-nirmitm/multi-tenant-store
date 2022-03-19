@@ -1,20 +1,21 @@
 package com.store.multitenantstore.service.product;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.store.multitenantstore.documents.Product;
 import com.store.multitenantstore.documents.Purchase;
-import com.store.multitenantstore.models.ProductDto;
+import com.store.multitenantstore.models.FetchProductDetailRequest;
+import com.store.multitenantstore.models.GenericRequest;
 import com.store.multitenantstore.models.ProductSubmitRequest;
 import com.store.multitenantstore.models.ProductSubmitResponse;
 import com.store.multitenantstore.repositories.ProductRepository;
 import com.store.multitenantstore.repositories.PurchaseRepository;
+import com.store.multitenantstore.utils.PaginationUtil;
 
 @Service
 public class AbstractProductService {
@@ -24,10 +25,14 @@ public class AbstractProductService {
 	
 	@Autowired
 	PurchaseRepository purchaseRepository;
-
 	
-	public List<Product> getAllProducts(){
-		List<Product> allProducts = productRepository.findAll();
+	@Autowired
+	PaginationUtil paginationUtil;
+	
+	public Page<Product> getAllProducts(GenericRequest<FetchProductDetailRequest> genericRequest){
+		FetchProductDetailRequest fetchProductDetailRequest = genericRequest.getRequest();
+		Pageable pageable = paginationUtil.getPaginationObject(genericRequest.getPagination());
+		Page<Product> allProducts = productRepository.findByTenantId(fetchProductDetailRequest.getTenantId(),pageable);
 		return allProducts;		
 	} 
 	
